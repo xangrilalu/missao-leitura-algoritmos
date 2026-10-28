@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missão Leitura e Algoritmos</title>
+<style>
+:root{--ink:#24324a;--blue:#2563eb;--orange:#f97316;--green:#15803d;--pale:#eff6ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#e0f2fe,#fef3c7);color:var(--ink);min-height:100vh}
+header{background:#1d4ed8;color:#fff;padding:22px 16px;text-align:center}
+header h1{margin:0 0 7px;font-size:clamp(1.5rem,4vw,2.2rem)}
+header p{margin:0}
+main{max-width:850px;margin:22px auto;padding:0 14px 28px}
+.top{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:14px}
+.pill{background:#fff;padding:10px 14px;border-radius:999px;font-weight:bold;box-shadow:0 2px 6px #0001}
+.card{background:#fff;border-radius:22px;padding:clamp(18px,4vw,30px);box-shadow:0 8px 24px #1e3a8a18;margin-bottom:16px}
+.tag{display:inline-block;background:#ffedd5;color:#9a3412;padding:6px 10px;border-radius:999px;font-weight:bold;font-size:.9rem}
+h2{margin:12px 0;font-size:1.5rem}
+.instruction{font-size:1.08rem;line-height:1.5}
+.options{display:grid;grid-template-columns:1fr;gap:10px;margin-top:18px}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:13px 16px;font-weight:bold;transition:transform .08s,filter .15s}
+button:active{transform:scale(.98)}
+.option{background:#eff6ff;border:2px solid #bfdbfe;color:#1e3a8a;text-align:left}
+.option:hover{filter:brightness(.97)}
+.option:disabled{cursor:default}
+.primary{background:#f97316;color:white}
+.secondary{background:#dbeafe;color:#1d4ed8}
+.feedback{font-weight:bold;min-height:28px;margin-top:14px;line-height:1.4}
+.progress{height:10px;background:#dbeafe;border-radius:99px;overflow:hidden;margin:14px 0}
+.bar{height:100%;width:0;background:#22c55e;transition:width .25s}
+.sequence{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.step{background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:12px 15px;font-weight:bold;min-width:62px;text-align:center}
+.small{font-size:.92rem;color:#475569}
+.hidden{display:none}
+footer{text-align:center;padding:0 12px 25px;color:#475569;font-size:.9rem}
+@media(min-width:600px){.options{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🚀 Missão Leitura e Algoritmos</h1>
+  <p>Jogo educativo • 2º ano do Ensino Fundamental</p>
+</header>
+<main>
+  <div class="top">
+    <div class="pill">⭐ Pontos: <span id="score">0</span></div>
+    <div class="pill">🎯 Desafio <span id="number">1</span> de <span id="total">8</span></div>
+  </div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <section class="card" id="game">
+    <span class="tag" id="kind">LEITURA DE FRASES</span>
+    <h2 id="title">Leia com atenção!</h2>
+    <p class="instruction" id="question"></p>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback" aria-live="polite"></div>
+    <button class="primary hidden" id="next" onclick="nextQuestion()">Próximo desafio ➜</button>
+  </section>
+  <section class="card hidden" id="end">
+    <h2>🎉 Missão concluída!</h2>
+    <p class="instruction" id="result"></p>
+    <p id="message"></p>
+    <button class="primary" onclick="restart()">Jogar novamente ↻</button>
+  </section>
+  <section class="card">
+    <h2>🧠 O que vamos praticar?</h2>
+    <p class="instruction">📚 Ler frases e compreender o que elas dizem.</p>
+    <p class="instruction">🤖 Pensamento computacional: seguir instruções, organizar etapas e encontrar uma sequência lógica.</p>
+    <p class="small">Dica para a professora: incentive a criança a ler em voz alta e explicar como pensou. O jogo funciona no navegador e não pede nome nem dados dos alunos.</p>
+  </section>
+</main>
+<footer>EMEF Sambaqui • Aprender brincando é uma aventura!</footer>
+<script>
+const questions = [
+ {kind:"LEITURA DE FRASES",title:"Desafio 1 — Quem está lendo?",q:"Leia a frase: “LIA LÊ UM LIVRO.” Quem está lendo?",opts:["Lia","O livro","Um gato"],a:0,why:"Isso mesmo! A frase conta que Lia está lendo."},
+ {kind:"COMPREENSÃO",title:"Desafio 2 — Entenda a frase",q:"“O GATO DORME NO SOFÁ.” Onde o gato dorme?",opts:["Na escola","No sofá","No jardim"],a:1,why:"Muito bem! A frase diz que o gato dorme no sofá."},
+ {kind:"LEITURA DE FRASES",title:"Desafio 3 — Escolha a frase",q:"Qual frase combina com uma criança que está chutando uma bola?",opts:["A MENINA LÊ UM MAPA.","O MENINO CHUTA A BOLA.","O PEIXE NADA NO MAR."],a:1,why:"Correto! O menino está chutando a bola."},
+ {kind:"PENSAMENTO COMPUTACIONAL",title:"Desafio 4 — Coloque em ordem",q:"Para escovar os dentes, qual é a ordem mais lógica?",opts:["Guardar a escova → colocar pasta → escovar","Escovar → colocar pasta → guardar a escova","Colocar pasta → escovar → guardar a escova"],a:2,why:"Isso! Primeiro colocamos a pasta, depois escovamos e, por fim, guardamos a escova."},
+ {kind:"PENSAMENTO COMPUTACIONAL",title:"Desafio 5 — Siga os comandos",q:"O robô está virado para a frente. Ele anda 2 passos e depois vira à direita. O que faz por último?",opts:["Anda 2 passos","Vira à direita","Volta ao início"],a:1,why:"Muito bem! Depois de andar 2 passos, o robô vira à direita."},
+ {kind:"LEITURA E LÓGICA",title:"Desafio 6 — Leia e descubra",q:"“BIA PEGOU O GUARDA-CHUVA PORQUE ESTAVA CHOVENDO.” Por que Bia pegou o guarda-chuva?",opts:["Porque estava chovendo","Porque queria nadar","Porque estava com fome"],a:0,why:"Correto! A chuva foi o motivo para pegar o guarda-chuva."},
+ {kind:"PENSAMENTO COMPUTACIONAL",title:"Desafio 7 — Encontre o padrão",q:"Observe a sequência: 🔵 🟠 🔵 🟠 🔵 ___. Qual figura vem a seguir?",opts:["🔵","🟠","⭐"],a:1,why:"Isso! As cores se alternam: azul, laranja, azul, laranja, azul, laranja."},
+ {kind:"ALGORITMO",title:"Desafio 8 — Ajude o robô",q:"O robô precisa chegar ao livro. Qual sequência de comandos é mais clara para seguir um caminho já marcado?",opts:["Fazer qualquer movimento","Seguir os comandos na ordem indicada","Pular todos os comandos"],a:1,why:"Perfeito! Um algoritmo é uma sequência de instruções organizada para cumprir uma tarefa."}
+];
+let index=0,score=0,answered=false;
+const $=id=>document.getElementById(id);
+$("total").textContent=questions.length;
+function render(){
+ const q=questions[index];answered=false;
+ $("kind").textContent=q.kind;$("title").textContent=q.title;$("question").textContent=q.q;
+ $("number").textContent=index+1;$("score").textContent=score;
+ $("bar").style.width=(index/questions.length*100)+"%";
+ $("feedback").textContent="";$("next").classList.add("hidden");
+ const box=$("options");box.innerHTML="";
+ q.opts.forEach((opt,i)=>{const b=document.createElement("button");b.className="option";b.textContent=opt;b.onclick=()=>answer(i);box.appendChild(b)});
+}
+function answer(i){
+ if(answered)return;answered=true;const q=questions[index];
+ [...$("options").children].forEach((b,j)=>{b.disabled=true;if(j===q.a){b.style.background="#dcfce7";b.style.borderColor="#22c55e"}else if(j===i){b.style.background="#fee2e2";b.style.borderColor="#ef4444"}});
+ if(i===q.a){score+=10;$("feedback").textContent="✅ Acertou! +10 pontos. "+q.why;$("feedback").style.color="#15803d"}
+ else{$("feedback").textContent="💡 Vamos aprender! "+q.why;$("feedback").style.color="#b45309"}
+ $("score").textContent=score;$("next").textContent=index===questions.length-1?"Ver resultado 🏁":"Próximo desafio ➜";$("next").classList.remove("hidden");
+}
+function nextQuestion(){
+ if(index<questions.length-1){index++;render()}else{$("game").classList.add("hidden");$("end").classList.remove("hidden");$("bar").style.width="100%";$("result").textContent="Você fez "+score+" de "+(questions.length*10)+" pontos!";$("message").textContent=score>=70?"Excelente trabalho! Você leu, pensou e resolveu desafios como um(a) grande explorador(a)!":"Muito bem por chegar até o fim! Leia novamente as frases e tente outra vez para descobrir ainda mais."}
+}
+function restart(){index=0;score=0;$("end").classList.add("hidden");$("game").classList.remove("hidden");render()}
+render();
+</script>
+</body>
+</html>
